@@ -15,7 +15,7 @@
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	auto m = Set_with_BigInt_and_unique_ptr<int>();
+	auto m = Set<int>();
 	for (int i = 1; i <= 2 * 100; i++) {
 		m.insert(i);
 	}

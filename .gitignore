@@ -11,10 +11,6 @@ CMakeUserPresets.json
 
 
 # 忽略所有 .txt 文件，除了 conanfile.txt 和 README.md
-*.txt
-!conanfile.txt
-!README.md
-!CMakeLists.txt
 
 
 # 其它通常需要被忽略的文件和目录
