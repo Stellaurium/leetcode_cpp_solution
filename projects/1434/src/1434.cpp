@@ -1,7 +1,10 @@
 //
 // Created by stellaura on 14/09/24.
 //
+#include <algorithm>
 #include <catch2/catch_all.hpp>
+#include <map>
+#include <set>
 #include <vector>
 using namespace std;
 
@@ -20,13 +23,27 @@ class Solution {
   private:
     // 回溯超时
     int backtrack(vector<vector<int>> &hats) {
+        std::map<std::set<int>, int64_t> memory;
         for (int i = 1; i <= 40; i++) {
             available_array[i] = true;
         }
-        return backtrack_(hats, 0);
+        vector<set<int>> all_need(11, set<int>());
+        for (int i = hats.size() - 1; i >= 0; i--) {
+            set_union(all_need[i + 1].begin(), all_need[i + 1].end(), hats[i].begin(), hats[i].end(),
+                      std::inserter(all_need[i], all_need[i].begin()));
+        }
+        return backtrack_(hats, 0, set<int>(), memory, all_need);
     }
 
-    int64_t backtrack_(vector<vector<int>> &hats, int index) {
+    int64_t backtrack_(vector<vector<int>> &hats, int index, set<int> selected,
+                       std::map<std::set<int>, int64_t> &memory, vector<set<int>> &all_need) {
+        set<int> current_possible_hat;
+        set_difference(all_need[index].begin(), all_need[index].end(), selected.begin(), selected.end(),
+                       std::inserter(current_possible_hat, current_possible_hat.begin()));
+        if (memory.contains(current_possible_hat)) {
+            return memory[current_possible_hat];
+        }
+
         if (index == hats.size()) {
             return 1;
         }
@@ -38,11 +55,14 @@ class Solution {
                 continue;
             }
             available_array[e] = 0;
-            dfs_count += backtrack_(hats, index + 1);
+            auto new_selected = set<int>(selected);
+            new_selected.insert(e);
+            dfs_count += backtrack_(hats, index + 1, new_selected, memory, all_need);
             dfs_count %= kMOD;
             available_array[e] = 1;
         }
 
+        memory[current_possible_hat] = dfs_count;
         return dfs_count;
     }
 };
