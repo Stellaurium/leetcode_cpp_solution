@@ -76,5 +76,5 @@ TEST_CASE() {
     REQUIRE(ret->val == 1);
     ret = ret->next;
     REQUIRE(ret->val == 5);
-    
+
 }

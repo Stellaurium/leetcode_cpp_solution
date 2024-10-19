@@ -18,20 +18,19 @@ find_package(spdlog REQUIRED)
 include_directories(${PROJECT_INCLUDE_DIRS})
 
 #=======================================================================
-set(EXCLUDED_DIRECTORIES)
+set(EXCLUDED_DIRECTORIES 1434)
 #=======================================================================
-
 
 
 # 获取所有子项目的目录
 file(GLOB SUB_PROJECTS "${PROJECT_SOURCE_DIR}/projects/*")
 
 # 遍历每个子项目并添加
-foreach(SUB_PROJECT ${SUB_PROJECTS})
-    if(IS_DIRECTORY ${SUB_PROJECT})
+foreach (SUB_PROJECT ${SUB_PROJECTS})
+    if (IS_DIRECTORY ${SUB_PROJECT})
         # 获取最后一个/后的名称 方便使用 EXCLUDED_DIRECTORIES 进行排除
         get_filename_component(LAST_PART ${SUB_PROJECT} NAME)
-        if(NOT LAST_PART IN_LIST EXCLUDED_DIRECTORIES)
+        if (NOT LAST_PART IN_LIST EXCLUDED_DIRECTORIES)
             # 设置子项目的名称（使用文件夹名称）
             set(PROJECT_NAME ${LAST_PART})
             project(${PROJECT_NAME})
@@ -50,6 +49,24 @@ foreach(SUB_PROJECT ${SUB_PROJECTS})
             target_link_libraries(${PROJECT_NAME} fmt::fmt)
             target_link_libraries(${PROJECT_NAME} Catch2::Catch2WithMain)
             target_link_libraries(${PROJECT_NAME} spdlog::spdlog)
-        endif()
-    endif()
-endforeach()
+
+            # 记录需要测试的文件
+            list(APPEND TEST_TARGETS ${PROJECT_NAME})
+        endif ()
+    endif ()
+endforeach ()
+
+# 添加自定义目标来运行所有Catch2的测试
+add_custom_target(run_all_tests
+        COMMAND ${CMAKE_COMMAND} -E echo "Running all Catch2 tests..."
+        )
+
+# 遍历每个可执行文件，添加到run_all_tests中
+foreach (TEST_TARGET ${TEST_TARGETS})
+    add_custom_command(TARGET run_all_tests POST_BUILD
+            COMMAND ${EXECUTABLE_OUTPUT_PATH}/${TEST_TARGET}
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+            COMMENT "Running tests for ${TEST_TARGET}"
+            VERBATIM
+            )
+endforeach ()
